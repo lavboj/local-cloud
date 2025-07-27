@@ -1,16 +1,37 @@
-# Compiled class file
+# === Java ===
 *.class
 
-# Log file
+# === Logs ===
 *.log
+logs/
 
-# BlueJ files
-*.ctxt
+# === Maven ===
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# === IntelliJ IDEA ===
+.idea/
+*.iml
 
-# Package Files #
+# === VS Code ===
+.vscode/
+
+# === System files ===
+.DS_Store
+Thumbs.db
+
+# === Crash logs ===
+hs_err_pid*
+replay_pid*
+
+# === Archives (optional, comment out if you use them intentionally) ===
 *.jar
 *.war
 *.nar
@@ -19,6 +40,6 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# === Editor backups ===
+*.swp
+*~
