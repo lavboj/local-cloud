@@ -43,3 +43,6 @@ replay_pid*
 # === Editor backups ===
 *.swp
 *~
+
+# === Test folders ===
+storage/
