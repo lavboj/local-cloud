@@ -32,4 +32,23 @@ public class StorageService {
         }
     }
 
+    public void createDirectory(String userPath, String directoryName) throws IOException {
+        Path currentPath = rootPath.resolve(userPath).normalize();
+        Path newDirPath = currentPath.resolve(directoryName).normalize();
+
+        if (!currentPath.startsWith(rootPath) || !newDirPath.startsWith(rootPath)) {
+            throw new IllegalArgumentException("Access to the specified path is not allowed.");
+        }
+
+        if (!Files.exists(newDirPath)) {
+            Files.createDirectories(newDirPath);
+            return;
+        } else  if (Files.isDirectory(newDirPath)) {
+            throw new IllegalArgumentException("Directory already exists");
+        } else {
+            throw new IllegalArgumentException("This name is already in use for file");
+        }
+
+    }
+
 }
