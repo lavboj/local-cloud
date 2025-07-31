@@ -18,6 +18,28 @@ public class StorageService {
 
     private final Path rootPath = Paths.get("storage");
 
+    public enum DirContent {
+        EMPTY,
+        FILES_ONLY,
+        HAS_DIRECTORIES
+    }
+
+    public DirContent checkContent(Path dirPath) throws IOException {
+        try (Stream<Path> items = Files.list(dirPath)) {
+            boolean hasFiles = false;
+            boolean hasDirectories = false;
+
+            for (Path item : items.toList()) {
+                if (Files.isDirectory(item)) hasDirectories = true;
+                else if (Files.isRegularFile(item)) hasFiles = true;
+            }
+
+            if (!hasFiles && !hasDirectories) return DirContent.EMPTY;
+            else if (!hasFiles && hasDirectories) return DirContent.HAS_DIRECTORIES;
+            return DirContent.FILES_ONLY;
+        }
+    }
+
     public List<FileItem> getContent(String userPath) throws IOException{
         Path currentPath = rootPath.resolve(userPath).normalize();
 
@@ -50,5 +72,4 @@ public class StorageService {
         }
 
     }
-
 }
