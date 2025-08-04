@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lavboj.local_cloud.model.FileItem;
 import com.lavboj.local_cloud.service.StorageService;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 
 @RestController
@@ -49,9 +46,9 @@ public class StorageController {
     
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteDirectory(
-        @RequestParam String userPath,
-        @RequestParam String directoryName,
-        @RequestParam boolean confirmed
+        @RequestParam(defaultValue = "") String userPath,
+        @RequestParam(required = true) String directoryName,
+        @RequestParam(name = "confirmed", defaultValue = "false") boolean confirmed
     ){
         try {
             storageService.deleteDirectory(userPath, directoryName, confirmed);
