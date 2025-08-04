@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,11 +47,18 @@ public class StorageController {
         }
     }
     
-    @PostMapping("/delete")
-    public ResponseEntity<?> deleteDirectory(@RequestBody String entity) {
-        //TODO: process POST request
-        
-        return entity;
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteDirectory(
+        @RequestParam String userPath,
+        @RequestParam String directoryName,
+        @RequestParam boolean confirmed
+    ){
+        try {
+            storageService.deleteDirectory(userPath, directoryName, confirmed);
+            return ResponseEntity.status(HttpStatus.OK).body("Deleting was succesfull");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Problem with deleting: " + e.getMessage());
+        }
     }
     
 
