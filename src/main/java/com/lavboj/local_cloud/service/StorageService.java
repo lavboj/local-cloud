@@ -109,6 +109,16 @@ public class StorageService {
     }
 
     public void deleteFile(String userPath, String fileName) throws IOException {
-        
+        Path targetPath = rootPath.resolve(userPath).resolve(fileName).normalize();
+
+        if(!targetPath.startsWith(rootPath)) {
+            throw new IllegalArgumentException("Access to the specified path is not allowed.");
+        }
+
+        if(!Files.exists(targetPath) || Files.isDirectory(targetPath)) {
+            throw new NoSuchFileException("File does not exist: " + targetPath);
+        }
+
+        Files.deleteIfExists(targetPath);
     }
 }
