@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lavboj.local_cloud.model.FileItem;
 import com.lavboj.local_cloud.service.StorageService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -41,6 +43,13 @@ public class StorageController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This name is already in use");
         }
+    }
+    
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteDirectory(@RequestBody String entity) {
+        //TODO: process POST request
+        
+        return entity;
     }
     
 
