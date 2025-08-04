@@ -44,7 +44,7 @@ public class StorageController {
         }
     }
     
-    @DeleteMapping("/delete")
+    @DeleteMapping("/deleteDirectory")
     public ResponseEntity<?> deleteDirectory(
         @RequestParam(defaultValue = "") String userPath,
         @RequestParam(required = true) String directoryName,
@@ -58,5 +58,4 @@ public class StorageController {
         }
     }
     
-
 }
