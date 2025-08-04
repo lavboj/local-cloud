@@ -57,5 +57,18 @@ public class StorageController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Problem with deleting: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/deleteFile")
+    public ResponseEntity<?> deleteFile(
+        @RequestParam(defaultValue = "") String userPath,
+        @RequestParam(required = true) String fileName
+    ){
+        try {
+            storageService.deleteFile(userPath, fileName);
+            return ResponseEntity.status(HttpStatus.OK).body("Deleting was succesfull");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Problem with deleting: " + e.getMessage());
+        }
+    }
     
 }
