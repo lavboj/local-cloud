@@ -107,4 +107,8 @@ public class StorageService {
             throw new IllegalStateException("Directory is not empty, confirmation required to delete.");
         }
     }
+
+    public void deleteFile(String userPath, String fileName) throws IOException {
+        
+    }
 }
