@@ -9,7 +9,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -108,17 +110,28 @@ public class StorageService {
         }
     }
 
-    public void deleteFile(String userPath, String fileName) throws IOException {
-        Path targetPath = rootPath.resolve(userPath).resolve(fileName).normalize();
+    public Map<String, String> deleteFile(String userPath, List<String> listFileName) throws IOException {
+        Map<String, String> result = new HashMap<>();
+        for (String fileName : listFileName) {
+            try {
+                Path targetPath = rootPath.resolve(userPath).resolve(fileName).normalize();
 
-        if(!targetPath.startsWith(rootPath)) {
-            throw new IllegalArgumentException("Access to the specified path is not allowed.");
+                if(!targetPath.startsWith(rootPath)) {
+                    result.put(fileName, "Error: Access to the specified path is not allowed.");
+                    continue;
+                }
+
+                if(!Files.exists(targetPath) || Files.isDirectory(targetPath)) {
+                    result.put(fileName, "Error: File does not exist");
+                    continue;
+                }
+                
+                Files.deleteIfExists(targetPath);
+                result.put(fileName, "File was succesfully deleted");
+            } catch (Exception e) {
+                result.put(fileName, "Error: " + e.getMessage());
+            }
         }
-
-        if(!Files.exists(targetPath) || Files.isDirectory(targetPath)) {
-            throw new NoSuchFileException("File does not exist: " + targetPath);
-        }
-
-        Files.deleteIfExists(targetPath);
+        return result;
     }
 }
