@@ -2,6 +2,7 @@ package com.lavboj.local_cloud.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lavboj.local_cloud.model.FileItem;
 import com.lavboj.local_cloud.service.StorageService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
@@ -59,15 +61,21 @@ public class StorageController {
     }
 
     @DeleteMapping("/deleteFile")
-    public ResponseEntity<?> deleteFile(
+    public ResponseEntity<Map<String, String>> deleteFile(
         @RequestParam(defaultValue = "") String userPath,
-        @RequestParam(required = true) String fileName
+        @RequestBody(required = true) List<String> listFileName
     ){
         try {
-            storageService.deleteFile(userPath, fileName);
-            return ResponseEntity.status(HttpStatus.OK).body("Deleting was succesfull");
+            Map<String, String> result = storageService.deleteFile(userPath, listFileName);
+
+            boolean hasErrors = result.values().stream()
+                    .anyMatch(status -> status.startsWith("Error"));
+
+            HttpStatus status = hasErrors ? HttpStatus.MULTI_STATUS : HttpStatus.OK;
+
+            return ResponseEntity.status(status).body(result);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Problem with deleting: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("Error:", e.getMessage()));
         }
     }
     
