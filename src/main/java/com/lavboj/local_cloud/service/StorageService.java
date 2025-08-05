@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class StorageService {
@@ -133,5 +134,9 @@ public class StorageService {
             }
         }
         return result;
+    }
+
+    public void uploadFile(String userPath, MultipartFile file) throws IOException {
+        
     }
 }
