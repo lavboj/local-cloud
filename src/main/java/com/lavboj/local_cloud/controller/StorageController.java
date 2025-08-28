@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lavboj.local_cloud.model.FileItem;
 import com.lavboj.local_cloud.service.StorageService;
@@ -45,6 +46,20 @@ public class StorageController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This name is already in use");
         }
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFile(
+        @RequestParam(defaultValue = "") String userPath,
+        @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            storageService.uploadFile(userPath, file);
+            return ResponseEntity.status(HttpStatus.OK).body("File uploaded");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("Error:", e.getMessage()));
+        }
+    }
+    
     
     @DeleteMapping("/deleteDirectory")
     public ResponseEntity<?> deleteDirectory(
