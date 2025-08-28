@@ -2,12 +2,14 @@ package com.lavboj.local_cloud.service;
 import com.lavboj.local_cloud.model.FileItem;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.List;
@@ -137,6 +139,15 @@ public class StorageService {
     }
 
     public void uploadFile(String userPath, MultipartFile file) throws IOException {
-        
+        Path targetPath = rootPath.resolve(userPath).normalize();
+        Path destinationFile = targetPath.resolve(Paths.get(file.getOriginalFilename())).normalize();
+
+        if (!destinationFile.startsWith(rootPath)) {
+            throw new IllegalArgumentException("Access to the specified path is not allowed.");
+        }
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 }
