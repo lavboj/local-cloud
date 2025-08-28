@@ -1,0 +1,40 @@
+body{margin:0;padding:40px;background:#2c2f33;color:#fff;font-family:monospace;display:flex;justify-content:center}
+.container{width:100%;max-width:1200px}
+.top-bar{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.sort-symbols{display:flex;gap:8px;opacity:.6}
+.sort-symbols span{cursor:pointer;user-select:none;transition:.2s}
+.sort-symbols span:hover{color:#7289da}
+.top-buttons{display:flex;gap:6px;align-items:center}
+.top-buttons button{background:transparent;color:#fff;border:1px solid #5865f2;padding:5px 10px;border-radius:4px;cursor:pointer;transition:.2s}
+.top-buttons button:hover{background:#3a3d42}
+.separator{border:none;height:1px;background:#5865f2;margin:6px 0}
+#search-input{flex:1;max-width:400px;padding:5px 10px;border-radius:6px;border:1px solid #5865f2;background:#40444b;color:#fff;outline:none;transition:.2s}
+#search-input::placeholder{color:#b9bbbe}
+#search-input:focus{border-color:#7289da;background:#4b4f59}
+
+/* --------- Ряд предметов --------- */
+.items-wrapper{width:100%}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.item{
+  background:#40444b;
+  height:60px;             /* чуть ниже */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  cursor:pointer;
+  padding:0 12px;          /* чуть меньше по горизонтали */
+  border:2px solid transparent; /* фиксированная граница, чтобы hover не прыгало */
+}
+.item:hover{background:#3a3d42}      /* без изменения border */
+.item.selected{border:2px solid #ff5555;background:#3a3d42}
+.item.dir::before{content:'📁';margin-right:6px}
+
+/* --------- Контекстное меню --------- */
+.context-menu{position:absolute;background:#40444b;border:1px solid #7289da;border-radius:4px;display:none;flex-direction:column;z-index:1000;padding:4px 0}
+.context-menu div{padding:4px 16px;cursor:pointer;white-space:nowrap;transition:.2s}
+.context-menu div:hover{background:#5865f2}
+
