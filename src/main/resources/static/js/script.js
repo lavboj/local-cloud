@@ -1,190 +1,188 @@
-const content = document.getElementById('content');
-const menu = document.getElementById('context-menu');
-const searchInput = document.getElementById('search-input');
-const selectBtn = document.getElementById('select-btn');
-const deleteSelBtn = document.getElementById('delete-selected');
-const createDirBtn = document.getElementById('create-dir');
+// ======================= Глобальные переменные =======================
+const content=document.getElementById('content'),
+      menu=document.getElementById('context-menu'),
+      searchInput=document.getElementById('search-input'),
+      selectBtn=document.getElementById('select-btn'),
+      deleteSelBtn=document.getElementById('delete-selected'),
+      createDirBtn=document.getElementById('create-dir'),
+      pathDisplay=document.getElementById('current-path'),
+      createModal=document.getElementById('create-modal'),
+      createInput=document.getElementById('create-input');
+let selectedMode=false,currentPath='';
 
-let selectedMode = false;
-let currentPath = ''; // текущий путь (корень)
-
-// -------------------- Получение и отображение --------------------
-async function fetchItems(filter="") {
-    try {
-        const res = await fetch(`/api/storage/content?userPath=${encodeURIComponent(currentPath)}`);
-        const data = await res.json();
-
-        let items = data;
-        if(filter) items = items.filter(i => i.name.toLowerCase().includes(filter.toLowerCase()));
-
-        // Сортировка: сначала папки, потом файлы
-        items.sort((a,b)=> a.type !== b.type ? a.type === 'dir' ? -1 : 1 : a.name.localeCompare(b.name));
-
-        renderItems(items);
-    } catch(err) {
-        console.error('Ошибка при получении элементов:', err);
-    }
-}
-
-function renderItems(items){
-    content.innerHTML = '';
-    items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = `item ${item.type}`;   // добавляем класс dir или file
-        div.dataset.fullname = item.name;
-        div.dataset.directory = item.directory; // true/false
-        div.textContent = item.name;
-
-        div.onclick = () => {
-            if(selectedMode){
-                div.classList.toggle('selected');
-                updateDeleteBtn();
-            }
-        };
-
-        div.oncontextmenu = e => {
-            e.preventDefault();
-            menu.style.top = e.pageY + 'px';
-            menu.style.left = e.pageX + 'px';
-            menu.style.display = 'flex';
-            menu.dataset.target = item.name;
-            menu.dataset.type = item.type;      // сохраняем тип для контекстного меню
-        };
-
-        content.appendChild(div);
-    });
-
-    updateDeleteBtn();
-}
-
-
+// ======================= Служебные функции ==========================
 function updateDeleteBtn(){
-    const selected = document.querySelectorAll('.item.selected');
-    deleteSelBtn.style.display = selected.length ? 'inline-block' : 'none';
+  deleteSelBtn.style.display=document.querySelectorAll('.item.selected').length?'inline-block':'none';
+}
+function updatePathDisplay(){
+  pathDisplay.textContent=currentPath?'/'+currentPath:'/';
+}
+async function isDirEmpty(p,n){
+  try{
+    const path=(p?p.replace(/\/$/,'')+'/':'')+n,
+          r=await fetch(`/api/storage/content?userPath=${encodeURIComponent(path)}`);
+    if(!r.ok)return false;
+    const d=await r.json();
+    return !d.length;
+  }catch{return false;}
 }
 
-// -------------------- Поиск --------------------
-searchInput.oninput = e => fetchItems(e.target.value);
+// ======================= Загрузка и рендер элементов =================
+async function fetchItems(filter=""){
+  try{
+    const r=await fetch(`/api/storage/content?userPath=${encodeURIComponent(currentPath)}`),
+          data=await r.json();
+    let items=data;
+    if(filter) items=items.filter(i=>i.name.toLowerCase().includes(filter.toLowerCase()));
+    items.sort((a,b)=>a.directory!==b.directory?a.directory?-1:1:a.name.localeCompare(b.name));
+    renderItems(items);
+    updatePathDisplay();
+  }catch(e){console.error("Ошибка получения:",e);}
+}
+function renderItems(items){
+  content.innerHTML='';
+  items.forEach(i=>{
+    const d=document.createElement('div');
+    d.className=`item ${i.directory?'dir':'file'}`;
+    d.dataset.fullname=i.name;
+    d.dataset.directory=i.directory;
+    d.textContent=i.name;
 
-// -------------------- Режим выбора --------------------
-selectBtn.onclick = () => {
-    selectedMode = !selectedMode;
-    document.querySelectorAll('.item').forEach(d => d.classList.remove('selected'));
-    selectBtn.textContent = selectedMode ? 'Unselect' : 'Select';
-    updateDeleteBtn();
-};
-
-// -------------------- Создание директории --------------------
-createDirBtn.onclick = async () => {
-    const dirName = prompt('Введите имя новой папки');
-    if(!dirName) return;
-
-    try {
-        const res = await fetch(`/api/storage/create?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(dirName)}`, {
-            method: 'POST'
-        });
-
-        if(res.ok){
-            alert('Папка создана');
-            fetchItems(searchInput.value);
-        } else {
-            const text = await res.text();
-            alert('Ошибка: ' + text);
-        }
-    } catch(err) {
-        console.error('Ошибка при создании папки:', err);
-    }
-};
-
-// -------------------- Удаление выбранных элементов --------------------
-deleteSelBtn.onclick = async () => {
-    // Собираем выбранные элементы
-    const selectedItems = Array.from(document.querySelectorAll('.item.selected'))
-        .map(d => ({
-            name: d.dataset.fullname,
-            directory: d.dataset.directory === 'true'  // преобразуем строку в boolean
-        }));
-
-    if (!selectedItems.length) return;
-
-    if (!confirm(`Вы точно хотите удалить ${selectedItems.length} элемент(а/ов)?`)) return;
-
-    try {
-        for (const item of selectedItems) {
-            if (item.directory) {
-                // Папка — вызываем deleteDirectory
-                const confirmed = confirm(`Папка "${item.name}" может содержать файлы. Подтвердите удаление.`);
-                if (confirmed) {
-                    await fetch(`/api/storage/deleteDirectory?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(item.name)}&confirmed=true`, {
-                        method: 'DELETE'
-                    });
-                }
-            } else {
-                // Файл — вызываем deleteFile
-                await fetch(`/api/storage/deleteFile?userPath=${encodeURIComponent(currentPath)}`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify([item.name])
-                });
-            }
-        }
-
-        // Обновляем список после удаления
-        fetchItems(searchInput.value);
-
-    } catch (err) {
-        console.error('Ошибка при удалении:', err);
-        alert('Ошибка при удалении. Проверьте консоль.');
-    }
-};
-
-
-// -------------------- Контекстное меню --------------------
-['delete','rename','download'].forEach(id => {
-    document.getElementById(id).onclick = async () => {
-        const target = menu.dataset.target;
-        const type = menu.dataset.type;
-
-        try {
-            if(id === 'delete'){
-                if(type === 'file'){
-                    await fetch(`/api/storage/deleteFile?userPath=${encodeURIComponent(currentPath)}`, {
-                        method:'DELETE',
-                        headers:{'Content-Type':'application/json'},
-                        body: JSON.stringify([target])
-                    });
-                } else if(type === 'dir'){
-                    if(confirm(`Удалить папку "${target}"?`)){
-                        await fetch(`/api/storage/deleteDirectory?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(target)}&confirmed=true`, {method:'DELETE'});
-                    }
-                }
-            } else if(id === 'rename'){
-                const newName = prompt('Введите новое имя', target);
-                if(newName){
-                    await fetch('/api/storage/rename', {
-                        method:'POST',
-                        headers:{'Content-Type':'application/json'},
-                        body: JSON.stringify({ oldName: target, newName: newName, userPath: currentPath })
-                    });
-                }
-            } else if(id === 'download'){
-                window.location.href = `/api/storage/download?userPath=${encodeURIComponent(currentPath)}&fileName=${encodeURIComponent(target)}`;
-            }
-
-            menu.style.display = 'none';
-            fetchItems(searchInput.value);
-        } catch(err){
-            console.error(err);
-        }
+    // клик: select / переход в директорию
+    d.onclick=async()=>{
+      if(selectedMode){d.classList.toggle('selected'); updateDeleteBtn();}
+      else if(i.directory){currentPath=currentPath?currentPath+'/'+i.name:i.name; await fetchItems(searchInput.value);}
     };
+
+    // контекстное меню
+    d.oncontextmenu=e=>{
+      e.preventDefault();
+      menu.style.top=e.pageY+'px';
+      menu.style.left=e.pageX+'px';
+      menu.style.display='flex';
+      menu.dataset.target=i.name;
+      menu.dataset.directory=i.directory;
+    };
+    content.appendChild(d);
+  });
+  updateDeleteBtn();
+}
+
+// ======================= Навигация по пути ==========================
+pathDisplay.onclick=async()=>{
+  if(!currentPath) return;
+  const parts=currentPath.split('/'); parts.pop();
+  currentPath=parts.join('/');
+  await fetchItems(searchInput.value);
+};
+
+// ======================= Создание папки =============================
+createDirBtn.onclick=()=>{
+  createModal.style.display='flex';
+  createInput.value=''; createInput.focus();
+};
+document.getElementById('create-confirm').onclick=async()=>{
+  const name=createInput.value.trim();
+  if(!name) return alert('Введите имя папки');
+  createModal.style.display='none';
+  try{
+    const r=await fetch(`/api/storage/create?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(name)}`,{method:'POST'});
+    if(r.ok) fetchItems(searchInput.value); // убрали alert
+  }catch(e){console.error('Ошибка создания:',e);}
+};
+document.getElementById('create-cancel').onclick=()=>createModal.style.display='none';
+
+// ======================= Удаление элементов ========================
+deleteSelBtn.onclick=()=>{
+  const items=[...document.querySelectorAll('.item.selected')].map(d=>({name:d.dataset.fullname,directory:d.dataset.directory==='true'}));
+  if(!items.length) return;
+  const m=document.getElementById('delete-modal'), inp=document.getElementById('delete-input');
+  m.style.display='flex'; inp.value='';
+  document.getElementById('delete-confirm').onclick=async()=>{
+    if(inp.value!=="DELETE") return alert("Введите DELETE для подтверждения");
+    m.style.display='none';
+    try{
+      for(const i of items){
+        if(i.directory)
+          await fetch(`/api/storage/deleteDirectory?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(i.name)}&confirmed=true`,{method:'DELETE'});
+        else
+          await fetch(`/api/storage/deleteFile?userPath=${encodeURIComponent(currentPath)}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify([i.name])});
+      }
+      fetchItems(searchInput.value);
+    }catch(e){console.error(e); alert("Ошибка при удалении");}
+  };
+  document.getElementById('delete-cancel').onclick=()=>m.style.display='none';
+};
+
+// ======================= Контекстное меню ==========================
+['delete','rename','download'].forEach(id=>{
+  document.getElementById(id).onclick=async()=>{
+    const t=menu.dataset.target, isDir=menu.dataset.directory==='true';
+    try{
+      if(id==='delete'){
+        if(!isDir)
+          await fetch(`/api/storage/deleteFile?userPath=${encodeURIComponent(currentPath)}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify([t])});
+        else if(await isDirEmpty(currentPath,t))
+          await fetch(`/api/storage/deleteDirectory?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(t)}&confirmed=true`,{method:'DELETE'});
+        else{
+          const m=document.getElementById('delete-modal'),inp=document.getElementById('delete-input');
+          m.style.display='flex'; inp.value='';
+          document.getElementById('delete-confirm').onclick=async()=>{
+            if(inp.value!=="DELETE") return alert("Введите DELETE для подтверждения");
+            m.style.display='none';
+            await fetch(`/api/storage/deleteDirectory?userPath=${encodeURIComponent(currentPath)}&directoryName=${encodeURIComponent(t)}&confirmed=true`,{method:'DELETE'});
+            fetchItems(searchInput.value);
+          };
+          document.getElementById('delete-cancel').onclick=()=>m.style.display='none';
+          return;
+        }
+      }
+      menu.style.display='none';
+      fetchItems(searchInput.value);
+    }catch(e){console.error(e);}
+  };
 });
 
-// -------------------- Закрытие контекстного меню --------------------
-document.addEventListener('click', e => {
-    if(!e.target.classList.contains('item')) menu.style.display='none';
-});
+// ======================= Верхнее меню ==============================
+searchInput.oninput=e=>fetchItems(e.target.value);
+selectBtn.onclick=()=>{
+  selectedMode=!selectedMode;
+  document.querySelectorAll('.item').forEach(d=>d.classList.remove('selected'));
+  selectBtn.textContent=selectedMode?'Unselect':'Select';
+  updateDeleteBtn();
+};
 
-// -------------------- Инициализация --------------------
-document.addEventListener('DOMContentLoaded', () => {
-    fetchItems();
-});
+ // ==============================
+
+const uploadBtn = document.getElementById('upload-btn');
+const uploadInput = document.getElementById('upload-input');
+
+uploadBtn.onclick = () => uploadInput.click(); // открыть диалог выбора файла
+
+uploadInput.onchange = async () => {
+    const file = uploadInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userPath', currentPath); // текущая директория
+
+    try {
+        const res = await fetch('/api/storage/upload', {
+            method: 'POST',
+            body: formData
+        });
+        if (!res.ok) throw new Error(await res.text());
+        fetchItems(searchInput.value); // обновляем список файлов
+        uploadInput.value = ''; // сброс
+        alert('Файл загружен!');
+    } catch (e) {
+        console.error(e);
+        alert('Ошибка при загрузке файла: ' + e.message);
+    }
+};
+
+
+// ======================= Глобальные события ========================
+document.addEventListener('click',e=>{if(!e.target.classList.contains('item'))menu.style.display='none';});
+document.addEventListener('DOMContentLoaded',()=>fetchItems());
