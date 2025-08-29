@@ -174,9 +174,22 @@ public class StorageService {
             try (ZipOutputStream zos = new ZipOutputStream(baos)){
                 zipFolder(file, file.getName(), zos);
             }
-            
+
             return new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()));
         }
+    }
+
+    public static class DownloadResource {
+        private final Resource resource;
+        private final String downloadName;
+
+        public DownloadResource(Resource resource, String downloadName) {
+            this.resource = resource;
+            this.downloadName = downloadName;
+        }
+
+        public Resource getResource() {return this.resource;}
+        public String getDownloadName() {return this.downloadName;}
     }
 
     private void zipFolder(File folder, String parentFolder, ZipOutputStream zos) throws IOException{
