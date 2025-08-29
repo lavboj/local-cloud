@@ -1,10 +1,14 @@
 package com.lavboj.local_cloud.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,12 +39,16 @@ public class StorageController {
     }
 
     @GetMapping("/download")
-    public String downloadFile(
+    public ResponseEntity<?> downloadFile(
             @RequestParam String userPath,
             @RequestParam String fileName
     ) throws IOException {
+        StorageService.DownloadResource dr = storageService.downloadFile(userPath, fileName);
         
-        return new String();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + dr.getDownloadName() + "\"" )
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(dr.getResource());
     }
     
 
