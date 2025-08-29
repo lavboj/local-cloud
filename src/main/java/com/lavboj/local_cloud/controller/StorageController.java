@@ -34,6 +34,16 @@ public class StorageController {
         return storageService.getContent(userPath);
     }
 
+    @GetMapping("/download")
+    public String downloadFile(
+            @RequestParam String userPath,
+            @RequestParam String fileName
+    ) throws IOException {
+        
+        return new String();
+    }
+    
+
     @PostMapping("/create")
     public ResponseEntity<?> createDirectory(
             @RequestParam(defaultValue = "") String userPath,
@@ -51,7 +61,7 @@ public class StorageController {
     public ResponseEntity<?> uploadFile(
         @RequestParam(defaultValue = "") String userPath,
         @RequestParam("file") MultipartFile file
-    ) {
+    ){
         try {
             storageService.uploadFile(userPath, file);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded");
