@@ -1,6 +1,7 @@
 package com.lavboj.local_cloud.service;
 import com.lavboj.local_cloud.model.FileItem;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.springframework.core.io.InputStreamResource;
@@ -163,18 +165,33 @@ public class StorageService {
         File file = targetPath.toFile();
 
         if (!file.exists()) throw new FileNotFoundException("File not found: " + fileName);
+
+        if (file.isFile()) {
+            return new InputStreamResource(new FileInputStream(file));
+        }
         else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (ZipOutputStream zos = new ZipOutputStream(baos)){
                 zipFolder(file, file.getName(), zos);
             }
+            
+            return new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()));
         }
-
-        return new InputStreamResource(new FileInputStream(file));
     }
 
-    private void zipFolder(File folder, String parentFolder, ZipOutputStream zos) {
-        
+    private void zipFolder(File folder, String parentFolder, ZipOutputStream zos) throws IOException{
+        for (File f : folder.listFiles()) {
+            String entryName = parentFolder + "/" + f.getName();
+            if (f.isDirectory()) {
+                zipFolder(f, entryName, zos);
+            } else {
+                try (FileInputStream fis = new FileInputStream(f)) {
+                    zos.putNextEntry(new ZipEntry(entryName));
+                    fis.transferTo(zos);
+                    zos.closeEntry();
+                }
+            }
+        }
     }
 
 
