@@ -1,6 +1,10 @@
 package com.lavboj.local_cloud.service;
 import com.lavboj.local_cloud.model.FileItem;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileVisitResult;
@@ -16,7 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipOutputStream;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -150,4 +157,25 @@ public class StorageService {
             Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
         }
     }
+
+    public Resource downloadFile(String userPath, String fileName) throws IOException {
+        Path targetPath = rootPath.resolve(userPath).resolve(fileName).normalize();
+        File file = targetPath.toFile();
+
+        if (!file.exists()) throw new FileNotFoundException("File not found: " + fileName);
+        else {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(baos)){
+                zipFolder(file, file.getName(), zos);
+            }
+        }
+
+        return new InputStreamResource(new FileInputStream(file));
+    }
+
+    private void zipFolder(File folder, String parentFolder, ZipOutputStream zos) {
+
+    }
+
+
 }
