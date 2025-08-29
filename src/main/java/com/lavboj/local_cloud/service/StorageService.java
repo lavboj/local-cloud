@@ -160,14 +160,17 @@ public class StorageService {
         }
     }
 
-    public Resource downloadFile(String userPath, String fileName) throws IOException {
+    public DownloadResource downloadFile(String userPath, String fileName) throws IOException {
         Path targetPath = rootPath.resolve(userPath).resolve(fileName).normalize();
         File file = targetPath.toFile();
 
         if (!file.exists()) throw new FileNotFoundException("File not found: " + fileName);
 
+        String downloadName = fileName;
+        Resource resource;
+
         if (file.isFile()) {
-            return new InputStreamResource(new FileInputStream(file));
+            resource = new InputStreamResource(new FileInputStream(file));
         }
         else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -175,8 +178,11 @@ public class StorageService {
                 zipFolder(file, file.getName(), zos);
             }
 
-            return new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()));
+            resource = new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()));
+            downloadName += ".zip";
         }
+
+        return new DownloadResource(resource, downloadName);
     }
 
     public static class DownloadResource {
