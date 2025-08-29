@@ -1,38 +1,61 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist File Browser</title>
-    <!-- Подключение CSS из static -->
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimalist File Browser</title>
+<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
-<div class="container">
-    <div class="top-bar">
-        <div class="sort-symbols">
-            <span id="sort-alpha">A→Z</span>
-            <span id="sort-reverse">Z→A</span>
-        </div>
-        <input type="text" id="search-input" placeholder="Search files and directories...">
-        <div class="top-buttons">
-            <button id="create-dir">Create Dir</button>
-            <button id="select-btn">Select</button>
-            <button id="delete-selected" style="display:none;color:#ff5555;">Delete</button>
-        </div>
+<!-- ====== Модалки ====== -->
+<div id="delete-modal" class="modal">
+  <div class="modal-content">
+    <h3>Confirm Deletion</h3>
+    <p>Type <b>DELETE</b> to confirm removal of selected items.</p>
+    <input id="delete-input" type="text" placeholder="DELETE">
+    <div class="modal-buttons">
+      <button id="delete-confirm">Confirm</button>
+      <button id="delete-cancel">Cancel</button>
     </div>
-    <hr class="separator">
-    <!-- Контейнер для JS-рендера файлов -->
-    <div class="items" id="content"></div>
+  </div>
 </div>
 
+<div id="create-modal" class="modal" style="display:none;">
+  <div class="modal-content" style="display:flex;flex-direction:column;gap:10px;min-width:250px;">
+    <span>Введите имя новой папки</span>
+    <input type="text" id="create-input">
+    <div class="modal-buttons" style="justify-content:flex-end;gap:10px;">
+      <button id="create-confirm">Создать</button>
+      <button id="create-cancel">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Контейнер и верхнее меню ====== -->
+<div class="container">
+  <div class="top-bar">
+    <div id="current-path">/</div>
+    <input type="text" id="search-input" placeholder="Search files and directories...">
+    <div class="top-buttons">
+      <button id="upload-btn">Upload</button>
+      <input type="file" id="upload-input" style="display:none">
+      <button id="create-dir">Create Dir</button>
+      <button id="select-btn">Select</button>
+      <button id="delete-selected" style="display:none;color:#ff5555;">Delete</button>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="items" id="content"></div>
+</div>
+
+<!-- ====== Контекстное меню ====== -->
 <div class="context-menu" id="context-menu">
-    <div id="rename">Rename</div>
-    <div id="delete">Delete</div>
-    <div id="download">Download</div>
+  <div id="rename">Rename</div>
+  <div id="delete">Delete</div>
+  <div id="download">Download</div>
 </div>
 
-<!-- Подключение JS из static -->
 <script th:src="@{/js/script.js}"></script>
 </body>
 </html>
