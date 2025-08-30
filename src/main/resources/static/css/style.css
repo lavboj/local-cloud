@@ -1,36 +1,74 @@
-/* ====== Базовые ====== */
-body{margin:0;padding:40px;background:#2c2f33;color:#fff;font-family:monospace;display:flex;justify-content:center}
-.container{width:100%;max-width:1200px}
+body{margin:0;padding:40px;background:#2c2f33;color:#fff;font-family:monospace;display:flex;justify-content:center}.container{width:100%;max-width:1200px}
 
-/* ====== Верхнее меню ====== */
-.top-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;flex-wrap:wrap}
+/* Верхнее меню */
+.top-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 #search-input{justify-self:center;width:100%;max-width:400px;padding:5px 10px;border-radius:6px;border:1px solid #5865f2;background:#40444b;color:#fff;outline:none;transition:.2s}
 #search-input::placeholder{color:#b9bbbe}
 #search-input:focus{border-color:#7289da;background:#4b4f59}
+
+/* Путь */
+#current-path {
+  flex:0 0 300px; max-width:300px;
+  color:#b9bbbe; padding:5px 10px; border-radius:5px;
+  cursor:pointer; transition:.2s; background:#2c2f33;
+  direction:rtl; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-align:left;
+  user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;
+}
+#current-path:hover { background:#3a3d42; box-shadow:0 2px 4px rgba(0,0,0,.2); }
+
+
+/* Кнопки */
 .top-buttons{justify-self:end;display:flex;gap:6px;align-items:center}
-.top-buttons button{background:transparent;color:#fff;border:1px solid #5865f2;padding:5px 10px;border-radius:4px;cursor:pointer;transition:.2s}
-.top-buttons button:hover{background:#3a3d42}
-.separator{border:none;height:1px;background:#5865f2;margin:6px 0}
-#current-path{flex:1;color:#b9bbbe;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 10px}
+.top-buttons button{background:#2c2f33;color:#b9bbbe;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;height:32px;font-weight:500}
+.top-buttons button:hover{background:#3a3d42;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+#download-selected{color:rgb(144, 144, 243)}
+#delete-selected{color:#f55}
 
-/* ====== Сетка элементов ====== */
-.items-wrapper{width:100%}
-.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
-.item{background:#40444b;height:60px;display:flex;align-items:center;justify-content:center;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;padding:0 12px;border:2px solid transparent}
+/* Список */
+.items-header,.item{display:grid;grid-template-columns:3fr 1fr 1fr 1fr;padding:8px 12px;align-items:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.items-header{font-weight:bold;color:#b9bbbe;background:#3a3d42;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none}
+.item{border-bottom:1px solid #333;cursor:pointer;transition:.2s}
 .item:hover{background:#3a3d42}
-.item.selected{border:2px solid #ff5555;background:#3a3d42}
-.item.dir::before{content:'📁';margin-right:6px}
+.item.selected{background:#44475a;border-left:3px solid #ff5555}
+.col.name{display:flex;align-items:center;gap:6px}
 
-/* ====== Контекстное меню ====== */
+
+/* Контекстное меню */
 .context-menu{position:absolute;background:#40444b;border:1px solid #7289da;border-radius:4px;display:none;flex-direction:column;z-index:1000;padding:4px 0}
 .context-menu div{padding:4px 16px;cursor:pointer;white-space:nowrap;transition:.2s}
 .context-menu div:hover{background:#5865f2}
 
-/* ====== Модалки ====== */
+/* Модалки */
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:2000}
 .modal-content{background:#2c2f33;border:1px solid #5865f2;border-radius:8px;padding:20px;max-width:300px;width:90%;text-align:center}
 .modal-content h3{margin:0 0 10px}
 .modal-content input{width:100%;padding:6px;border-radius:6px;border:1px solid #5865f2;background:#40444b;color:#fff;margin:10px 0;outline:none}
 .modal-buttons{display:flex;gap:10px;justify-content:center}
-.modal-buttons button{background:transparent;color:#fff;border:1px solid #5865f2;padding:5px 12px;border-radius:4px;cursor:pointer;transition:.2s}
-.modal-buttons button:hover{background:#3a3d42}
+.modal-buttons button{background:#2c2f33;color:#b9bbbe;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;transition:background 0.2s,box-shadow 0.2s}
+.modal-buttons button:hover{background:#3a3d42;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+
+/* Разделители */
+.separator{border:none;height:1px;background:#5865f2;margin:12px 0}
+
+/* Тосты */
+.toast{position:fixed;bottom:20px;right:20px;background:rgba(72,75,90,.9);color:#fff;padding:10px 16px;border-radius:6px;opacity:0;transform:translateY(20px);transition:.3s;z-index:3000;}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ====== Адаптив для iPhone SE - 15 Pro Max ====== */
+/* ====== Адаптив для мобильных ====== */
+@media (max-width:430px){
+  body{padding:10px;font-size:13px}
+  .top-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px}
+  #current-path{max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 8px;font-size:12px}
+  #search-input{flex:1 1 auto;min-width:90px;max-width:200px;padding:6px 8px;font-size:16px}
+  .top-buttons{display:flex;flex-wrap:wrap;gap:4px;min-height:30px}
+  .top-buttons button{flex:1 1 auto;padding:5px 6px;font-size:12px;height:30px}
+  .items-header,.item{grid-template-columns:2fr 1fr 1fr 1fr;padding:6px 8px}
+  .items-header{font-size:12px;user-select:none}
+  .item{border-bottom:1px solid #333;cursor:pointer;transition:.2s}
+  .item.selected{border-left:3px solid #ff5555}
+  .col.name{gap:4px}
+  .modal-content{max-width:95%;padding:15px;font-size:13px}
+  input,textarea,select,button,.modal-content input,.modal-content textarea,.modal-content select,.modal-content button{font-size:16px;transform:scale(0.8125);transform-origin:left center}
+}
+
