@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minimalist File Browser</title>
@@ -40,14 +41,22 @@
     <div class="top-buttons">
       <button id="upload-btn">Upload</button>
       <input type="file" id="upload-input" style="display:none">
-      <button id="create-dir">Create Dir</button>
-      <button id="select-btn">Select</button>
-      <button id="download-selected" style="display:none;color:#55ff55;">Download</button>
-      <button id="delete-selected" style="display:none;color:#ff5555;">Delete</button>
-      
+      <button id="create-dir">Create Directory</button>
+      <button id="select-btn">Select Mode</button>
+      <button id="download-selected" class="select-mode">Download</button>
+      <button id="delete-selected" class="select-mode">Delete</button>
     </div>
   </div>
   <hr class="separator">
+
+  <!-- Заголовки колонок для списка -->
+  <div class="items-header">
+    <div class="col name">Name</div>
+    <div class="col ext">Extension</div>
+    <div class="col size">Size</div>
+    <div class="col date">Modified</div>
+  </div>
+
   <div class="items" id="content"></div>
 </div>
 
