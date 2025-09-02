@@ -229,5 +229,18 @@ public class StorageService {
         }
     }
 
+    public boolean renameItem(String userPath, String oldName, String newName) throws IOException{
+        Path targetPath = rootPath.resolve(userPath).normalize();
+        if (!targetPath.startsWith(rootPath)) throw new IllegalArgumentException("Доступ запрещен");
+
+        Path oldPath = targetPath.resolve(oldName);
+        Path newPath = targetPath.resolve(newName);
+
+        if (Files.exists(newPath)) return false;
+
+        Files.move(oldPath, newPath);
+        return true;
+    }
+
 
 }
