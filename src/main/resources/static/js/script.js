@@ -178,6 +178,22 @@ deleteSelBtn.onclick = () => {
                     document.getElementById('delete-cancel').onclick=()=>m.style.display='none';
                     return;
                 }
+            } else if(id==='rename'){
+                const newName = prompt("Введите новое имя:", t);
+                if(newName && newName !== t){
+                    const params = new URLSearchParams({
+                        userPath: currentPath,
+                        oldName: t,
+                        newName: newName
+                    });
+                    const res = await fetch(`/api/storage/rename?${params.toString()}`, { method: 'POST' });
+                    if(res.status === 409){
+                        showToast("Файл или папка с таким именем уже существует!");
+                    } else {
+                        showToast("Переименовано успешно");
+                        await fetchItems(searchInput.value);
+                    }
+                }
             }
             menu.style.display='none';
             fetchItems(searchInput.value);
