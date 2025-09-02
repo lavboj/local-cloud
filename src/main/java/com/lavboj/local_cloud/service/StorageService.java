@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +66,23 @@ public class StorageService {
         }
 
         try (Stream<Path> stream = Files.list(currentPath)) {
-            return stream
-                .map(path -> new FileItem(path.getFileName().toString(), Files.isDirectory(path)))
-                .collect(Collectors.toList());
+            return stream.map(path -> {
+                try {
+                    boolean isDir = Files.isDirectory(path);
+                    long size = isDir ? 0 : Files.size(path);
+
+                    BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+                    String modified = attrs.lastModifiedTime()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
+
+                    return new FileItem(path.getFileName().toString(), isDir, size, modified);
+
+                } catch (IOException e){
+                    throw new RuntimeException("Ошибка при чтении атрибутов " + path, e);
+                }
+            }).collect(Collectors.toList());
         }
     }
 
