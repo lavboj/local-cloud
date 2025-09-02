@@ -47,6 +47,18 @@ const showToast = (msg, duration = 3000) => {
     }, duration);
 };
 
+// ======================= Конвертация формата размеров =================
+
+const formatSize = (bytes) => {
+    if (!bytes) return '-';
+    const units = ['KB','MB','GB','TB'];
+    let i = Math.floor(Math.log(bytes) / Math.log(1024));
+    i = Math.max(0, i - 1); // чтобы 1024 байт = 1 KB
+    return (bytes / Math.pow(1024, i + 1)).toFixed(2) + ' ' + units[i];
+};
+
+
+
 // ======================= Загрузка и рендер элементов =================
 const fetchItems = async (filter = '') => {
     try {
@@ -72,7 +84,7 @@ const renderItems = (items) => {
             col.className = 'col ' + cls;
             if(cls==='name') col.innerHTML = (i.directory ? '📁 ' : '📄 ') + i.name;
             if(cls==='ext') col.textContent = i.directory ? '' : (i.name.split('.').pop() || '');
-            if(cls==='size') col.textContent = i.size || '-';
+            if(cls==='size') col.textContent = i.size ? formatSize(i.size) : '-';
             if(cls==='date') col.textContent = i.modified || '-';
             row.appendChild(col);
         });
