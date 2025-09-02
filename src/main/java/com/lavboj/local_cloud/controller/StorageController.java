@@ -1,11 +1,9 @@
 package com.lavboj.local_cloud.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders;
@@ -77,6 +75,18 @@ public class StorageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("Error:", e.getMessage()));
         }
     }
+
+    @PostMapping("/rename")
+    public ResponseEntity<?> postMethodName(
+        @RequestParam(defaultValue = "") String userPath,
+        @RequestParam(required = true) String oldName,
+        @RequestParam(required = true) String newName
+    ) throws IOException{
+        boolean answer = storageService.renameItem(userPath, oldName, newName);
+        if(answer) return ResponseEntity.ok("file was renamed");
+        else return ResponseEntity.status(HttpStatus.CONFLICT).body("this name already exists");
+    }
+    
     
     
     @DeleteMapping("/deleteDirectory")
